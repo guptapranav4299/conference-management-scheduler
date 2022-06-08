@@ -46,3 +46,6 @@ User Interface CSS in Rails Apps 30min <br>
 
 ## To run the program
 `python3 main.py`
+
+## To run the tests
+`python3 -m unittest tests.py `
