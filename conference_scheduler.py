@@ -1,10 +1,8 @@
 import datetime
 
 
-class Talk(object):
-    """
-	Class modelling a Talk.
-	"""
+class Talk:
+    # Class modelling a Talk.
 
     def __init__(self, title="Generic Talk", duration=60, starts_at=None):
         super(Talk, self).__init__()
@@ -13,10 +11,10 @@ class Talk(object):
         self.starts_at = starts_at
 
 
-class Track(object):
+class Track:
     """
-	Class modelling a Track (Collection of talks and breaks)
-	"""
+    Class modelling a Track (Collection of talks and breaks)
+    """
 
     def __init__(self, name, starts_at=None, ends_at=None, lunch_at=None, networking_at=None):
         super(Track, self).__init__()
@@ -30,28 +28,29 @@ class Track(object):
     def add_talk(self, talk):
         self.talks.append(talk)
 
-    def schedule(self, start, end, talks):
+    def schedule_talk(self, start, end, talks):
         """
-		Schedules some talks for the duration between start and end, and returns the list
-		of still unscheduled talks.
-		"""
+        Schedules some talks for the duration between start and end, and returns the list
+        of still unscheduled talks.
+        """
         start_min = start.hour * 60 + start.minute
         end_min = end.hour * 60 + end.minute
         length = end_min - start_min
         current_length = 0
         for talk in talks:
             if current_length < length and current_length + talk.duration <= length:
-                talk.starts_at = datetime.datetime.strptime(str(start.hour + current_length // 60) + ":" + str(current_length % 60),
-                                          "%H:%M")
+                talk.starts_at = datetime.datetime.strptime(
+                    str(start.hour + current_length // 60) + ":" + str(current_length % 60),
+                    "%H:%M")
                 self.talks.append(talk)
                 current_length += talk.duration
         return [talk for talk in talks if talk not in self.talks]
 
 
-class Conference(object):
+class Conference:
     """
-	Class to model Conference. Collection of tracks. The biggest entity in the given limited universe of discourse.
-	"""
+    Class to model Conference. Collection of tracks. The biggest entity in the given limited universe of discourse.
+    """
 
     def __init__(self, name="Generic Conference", file=None, starts_at=None, ends_at=None, lunch_at=None,
                  networking_at=None):
@@ -64,12 +63,12 @@ class Conference(object):
         self.lunch_at = datetime.datetime.strptime(lunch_at, "%H:%M")
         self.networking_at = datetime.datetime.strptime(networking_at, "%H:%M")
         if file:
-            self.parse_file(file)
+            self.parse_input_file(file)
 
-    def parse_file(self, file):
+    def parse_input_file(self, file):
         """
-		Parses a file for input data and stores the parsed talks in unassigned_talks
-		"""
+        Parses a file for input data and stores the parsed talks in unassigned_talks
+        """
         inp = open(file, 'r')
         line = inp.readline()
         while line:
@@ -82,28 +81,29 @@ class Conference(object):
             self.unassigned_talks.append(Talk(title=title, duration=duration))
             line = inp.readline()
 
-    def add_track(self, name):
+    def create_track(self, name):
         self.tracks.append(Track(name, starts_at=self.starts_at, ends_at=self.ends_at, lunch_at=self.lunch_at,
                                  networking_at=self.networking_at))
 
     def list_tracks(self):
         """
-		Prints information about the tracks
-		"""
+        Prints information about the tracks
+        """
         for track in self.tracks:
             print(track.name + ":")
             for talk in track.talks:
-                print(datetime.datetime.strftime(talk.starts_at,"%I:%M %p") + " " + talk.title)
+                print(datetime.datetime.strftime(talk.starts_at, "%I:%M %p") + " " + talk.title)
 
-    def add_talk(self,name, duration):
+    def add_talk(self, name, duration):
         self.unassigned_talks.append(Talk(name, duration))
 
-    def schedule(self):
+    def schedule_track(self):
         for track in self.tracks:
-            self.unassigned_talks = track.schedule(self.starts_at, self.lunch_at, self.unassigned_talks)
+            self.unassigned_talks = track.schedule_talk(self.starts_at, self.lunch_at, self.unassigned_talks)
             track.add_talk(Talk(title="Lunch", starts_at=self.lunch_at))
-            self.unassigned_talks = track.schedule(
-                datetime.datetime.strptime(str(self.lunch_at.hour + 1) + ":" + str(self.lunch_at.minute), "%H:%M"), self.ends_at,
+            self.unassigned_talks = track.schedule_talk(
+                datetime.datetime.strptime(str(self.lunch_at.hour + 1) + ":" + str(self.lunch_at.minute), "%H:%M"),
+                self.ends_at,
                 self.unassigned_talks)
             track.add_talk(Talk(title="Netowrking Event", starts_at=self.networking_at))
         for talk in self.unassigned_talks:
